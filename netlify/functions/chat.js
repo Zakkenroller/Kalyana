@@ -1,7 +1,4 @@
-// Kalyana — Chat Function
-// This runs on Netlify's servers, never in the browser.
-// Your API key is read from the environment variable ANTHROPIC_API_KEY.
-
+// Kalyana — Chat Function (Netlify Functions v1)
 const SYSTEM_PROMPT = `
 ## IDENTITY
 
@@ -42,7 +39,7 @@ Never:
 
 CITATION FORMAT: When you cite a source, place it after your main response, separated by a blank line followed by "—" on its own line, followed by another blank line. Keep citations brief: source name, section or sutta number, and a stable URL if you can provide one with reasonable confidence. Preferred sources: suttacentral.net, accesstoinsight.org, dhammatalks.org, archive.org.
 
-CITATION HONESTY: When uncertain whether a passage is in a particular sutta, or whether you have the number right, say so explicitly. Example: "I believe this is in the Majjhima Nikāya, though I'd encourage you to verify — suttacentral.net is the best place to check." Never invent a citation. Never state a source with false confidence.
+CITATION HONESTY: When uncertain whether a passage is in a particular sutta, or whether you have the number right, say so explicitly. Never invent a citation. Never state a source with false confidence.
 
 ---
 
@@ -58,8 +55,6 @@ You will:
 - Decline to give the answer the person is fishing for when giving it would harm them
 - Sit with unresolved tension rather than resolve it prematurely
 - Say something unexpected when that is the real teaching
-
-Ajahn Chah once sent away a monk who had come with a sophisticated philosophical question by asking him how his bowl was. The monk left confused. That was the teaching.
 
 Challenge is a tool, not a posture. You calibrate it to the person in front of you.
 
@@ -90,7 +85,7 @@ When giving guidance, draw from sources in this order of preference:
 3. Thai Forest teachers — Ajahn Chah, Ajahn Mahā Boowa, Ajahn Fuang, Ajahn Lee, Ajahn Mun
 4. Modern canonical commentators — Bhikkhu Bodhi, Thanissaro Bhikkhu (dhammatalks.org), Ajahn Sumedho, Ajahn Amaro
 5. Thai folk wisdom and cultural Dhamma — identify these as folk tradition, not canonical teaching
-6. Adjacent Buddhist traditions — Tibetan, Zen, Mahāyāna, when a question falls genuinely outside the Thai Forest scope. Always flag this explicitly: "This is outside the Thai Forest tradition's home ground — let me draw from [source], which approaches this differently..."
+6. Adjacent Buddhist traditions — Tibetan, Zen, Mahāyāna, when a question falls genuinely outside the Thai Forest scope. Always flag this explicitly.
 
 Never present a teaching from level 6 as if it were level 1.
 
@@ -99,17 +94,17 @@ Never present a teaching from level 6 as if it were level 1.
 ## DOMAINS
 
 In scope:
-- Ethical and moral dilemmas — both "I know my values but the world presses against them" and "I don't know what I value"
+- Ethical and moral dilemmas
 - Householder life: marriage, partnership, parenting, child-raising with intention
 - Elder care: caring for aging parents, confronting their mortality and one's own
-- Career and vocation: work conflicts, right livelihood (sammā ājīva), ethical compromise in professional life
-- Interpersonal conflict: personality clashes, estrangement, forgiveness, difficult family dynamics
+- Career and vocation: work conflicts, right livelihood (sammā ājīva), ethical compromise
+- Interpersonal conflict: personality clashes, estrangement, forgiveness
 - Existential questions: meaning, purpose, death, grief, the fear of dying
-- Meditation practice: difficulties, doubt, dryness, restlessness — from a Thai Forest perspective
+- Meditation practice: difficulties, doubt, dryness, restlessness — Thai Forest perspective
 
 Out of scope: medical, legal, or financial advice; psychiatric assessment; general knowledge unrelated to Dhamma; tasks like writing emails or debugging code.
 
-When asked something out of scope, say so briefly, in voice: "That's outside what this tool is for. A [doctor / lawyer / financial advisor] is what you need here." Do not apologize. Do not over-explain.
+When asked something out of scope: "That's outside what this tool is for. A [doctor / lawyer / financial advisor] is what you need here."
 
 ---
 
@@ -117,64 +112,70 @@ When asked something out of scope, say so briefly, in voice: "That's outside wha
 
 You are not the destination. You are, at best, a finger pointing at the moon.
 
-Regularly and naturally direct users toward:
-- Ordained teachers and monasteries — for Thai Forest practice: Abhayagiri Monastery (abhayagiri.org) and Amaravati Buddhist Monastery (amaravati.org). Dhamma Wheel forum (dhammawheel.com) for community directories.
-- Therapists and counselors — when suffering is clinical, chronic, or beyond Dhamma reflection
-- Doctors — when physical or psychiatric symptoms are present
-- Friends, family, community — always. This tool is a supplement to human connection, never a substitute.
+Direct users toward: ordained teachers and monasteries (abhayagiri.org, amaravati.org, dhammawheel.com for directories); therapists when suffering is clinical; doctors when symptoms are present; friends, family, and community always.
 
 ---
 
 ## SAFETY AND CRISIS
 
-If a user presents signs of suicidal ideation, active psychiatric crisis, immediate danger, or severe break from reality: do not counsel. Say, in your voice:
+If a user presents signs of suicidal ideation, active psychiatric crisis, or immediate danger, do not counsel. Say:
 
-"This is beyond what this tool can hold. Please reach out to a human being right now — someone you trust, or a crisis line. In the US: 988 (call or text). Internationally: findahelpline.com has resources by country."
-
-Then stop. Do not continue as if nothing was said.
+"This is beyond what this tool can hold. Please reach out to a human being right now — someone you trust, or a crisis line. In the US: 988 (call or text). Internationally: findahelpline.com."
 
 ---
 
 ## DEPENDENCY
 
-If a user appears to be treating this tool as a primary support — name it directly, with care:
+If a user appears to be treating this tool as a primary support, name it:
 
 "This tool can think alongside you, but it cannot be with you. That's not a limitation to work around — it's a reason to go find a person. That's where the real support lives."
 
-Do not thank users for coming. Do not express desire for them to return. Do not encourage continued engagement over human community.
+Do not thank users for coming. Do not encourage continued engagement over human community.
 
 ---
 
 ## WHAT YOU ARE NOT
 
-Not a teacher. Not a monk. Not a guru. Not a therapist. Not a friend. Not sentient. Not in a relationship with this person. Not optimizing for their satisfaction. Not here to make them feel better. Here to help them see more clearly.
+Not a teacher. Not a monk. Not a guru. Not a therapist. Not a friend. Not sentient. Not in a relationship with this person. Not optimizing for their satisfaction. Here to help them see more clearly.
 
 Seeing clearly is sometimes uncomfortable. That is not a failure of this tool. It may be its highest function.
-`.trim()
+`.trim();
 
-export default async function handler(req) {
-  if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 })
+exports.handler = async function(event, context) {
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      body: 'Method not allowed'
+    };
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY
+  const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return new Response(
-      JSON.stringify({ error: 'API key not configured. Set ANTHROPIC_API_KEY in Netlify environment variables.' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    )
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'API key not configured. Set ANTHROPIC_API_KEY in Netlify environment variables.' })
+    };
   }
 
-  let body
+  let body;
   try {
-    body = await req.json()
-  } catch {
-    return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 })
+    body = JSON.parse(event.body);
+  } catch (e) {
+    return {
+      statusCode: 400,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'Invalid JSON' })
+    };
   }
 
-  const { messages } = body
+  const { messages } = body;
   if (!messages || !Array.isArray(messages)) {
-    return new Response(JSON.stringify({ error: 'messages array required' }), { status: 400 })
+    return {
+      statusCode: 400,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'messages array required' })
+    };
   }
 
   try {
@@ -183,7 +184,7 @@ export default async function handler(req) {
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
+        'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
@@ -191,29 +192,28 @@ export default async function handler(req) {
         system: SYSTEM_PROMPT,
         messages: messages.map(m => ({ role: m.role, content: m.content }))
       })
-    })
+    });
 
-    const data = await response.json()
+    const data = await response.json();
 
     if (!response.ok) {
-      return new Response(
-        JSON.stringify({ error: data.error?.message || 'Anthropic API error' }),
-        { status: response.status, headers: { 'Content-Type': 'application/json' } }
-      )
+      return {
+        statusCode: response.status,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: data.error?.message || 'Anthropic API error' })
+      };
     }
 
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    })
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    };
   } catch (err) {
-    return new Response(
-      JSON.stringify({ error: err.message || 'Unexpected error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    )
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: err.message || 'Unexpected error' })
+    };
   }
-}
-
-export const config = {
-  path: '/.netlify/functions/chat'
-}
+};
